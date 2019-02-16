@@ -11,7 +11,7 @@
   </properties>
   
   <build>
-    <sourceDirectory>src/main/</sourceDirectory>
+    <sourceDirectory>src/main/java/</sourceDirectory>
 	<finalName>${project.name}</finalName>
     <resources>
       <resource>
