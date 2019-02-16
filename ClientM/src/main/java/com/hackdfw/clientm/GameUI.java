@@ -5,12 +5,14 @@ import java.awt.*;
 import java.net.URL;
 import java.util.Objects;
 
+import static com.google.common.io.Resources.getResource;
+
 public class GameUI extends JFrame {
 
     /** Default dimension */
-    private final static Dimension DEFAULT_SIZE = new Dimension(1280, 720);
-    private final static String IMAGE_DIR = "../image/";
-    protected static int GAMESTATE = 0;
+    protected final static Dimension DEFAULT_SIZE = new Dimension(1280, 720);
+    protected final static String IMAGE_DIR = "../image/";
+    protected static int GAMESTATE;
 
     private static JPanel main = new JPanel();
     private static JPanel userOverlay = new JPanel();
@@ -40,10 +42,7 @@ public class GameUI extends JFrame {
     protected void configureUI() {
         setIconImage(Objects.requireNonNull(createImageIcon("logo.png")).getImage());
         setLayout(new BorderLayout());
-
-        main = getMain(GAMESTATE);
-        userOverlay = getButtons(GAMESTATE);
-        spriteLayer = getSprites(GAMESTATE);
+        changeState(0);
 
         add(main, BorderLayout.CENTER);
         add(userOverlay, BorderLayout.CENTER);
@@ -56,8 +55,8 @@ public class GameUI extends JFrame {
      * @return returns image icon if image was found, otherwise null
      */
 
-    protected ImageIcon createImageIcon(String name) {
-        URL imageUrl = getClass().getResource(IMAGE_DIR + name);
+    protected static ImageIcon createImageIcon(String name) {
+        URL imageUrl = getResource(IMAGE_DIR + name);
         if(imageUrl != null) return new ImageIcon(imageUrl);
         return null;
     }
@@ -68,18 +67,12 @@ public class GameUI extends JFrame {
      */
     protected void changeState(int state) {
         GAMESTATE = state;
-        main = getMain(GAMESTATE);
-        userOverlay = getButtons(GAMESTATE);
-        spriteLayer = getSprites(GAMESTATE);
+        main = new BackgroundPanel();
+        userOverlay = new MenuPanel();
+        spriteLayer = new SpritePanel();
 
-        main.revalidate();
-        userOverlay.revalidate();
-        spriteLayer.revalidate();
         revalidate();
-
-        main.repaint();
-        userOverlay.repaint();
-        spriteLayer.repaint();
         repaint();
     }
+
 }
