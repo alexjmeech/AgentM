@@ -1,4 +1,4 @@
-import com.hackdfw.clientm.GameUI;
+package com.hackdfw.clientm;
 
 public class App {
     public static void main( String[] args ) {
