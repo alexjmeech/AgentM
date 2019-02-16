@@ -1,4 +1,4 @@
-package java.com.hackdfw.clientm;
+package com.hackdfw.clientm;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,11 +6,11 @@ import java.awt.*;
 public class BackgroundPanel extends JPanel {
     private Image img;
 
-    public BackgroundPanel() {
-        this(GameUI.createImageIcon(backgroundFromState()).getImage());
+    protected BackgroundPanel() {
+        this(GameUI.createImageIcon(backgroundFromState(GameUI.GAMESTATE)).getImage());
     }
 
-    public BackgroundPanel(Image img) {
+    private BackgroundPanel(Image img) {
         this.img = img;
         setSize(GameUI.DEFAULT_SIZE);
         setLayout(null);
@@ -20,8 +20,8 @@ public class BackgroundPanel extends JPanel {
         g.drawImage(img, 0, 0, null);
     }
 
-    private static String backgroundFromState() {
-        switch(GameUI.GAMESTATE) {
+    private static String backgroundFromState(int state) {
+        switch(state) {
             case 1: return GameUI.IMAGE_DIR + "loading.png";
             case 2: return GameUI.IMAGE_DIR + "day.png";
             case 3: return GameUI.IMAGE_DIR + "night.png";

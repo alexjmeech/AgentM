@@ -1,4 +1,4 @@
-package java.com.hackdfw.clientm;
+package com.hackdfw.clientm;
 
 import javax.swing.*;
 

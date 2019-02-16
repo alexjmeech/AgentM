@@ -1,4 +1,4 @@
-package java.com.hackdfw.clientm;
+package com.hackdfw.clientm;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,9 +9,11 @@ import static com.google.common.io.Resources.getResource;
 
 public class GameUI extends JFrame {
 
-    /** Default dimension */
+    /**
+     * Default dimension
+     */
     protected final static Dimension DEFAULT_SIZE = new Dimension(1280, 720);
-    protected final static String IMAGE_DIR = "../image/";
+    protected final static String IMAGE_DIR = "resources/image/";
     protected static int GAMESTATE;
 
     private static JPanel main = new JPanel();
@@ -19,7 +21,9 @@ public class GameUI extends JFrame {
     private static JPanel spriteLayer = new JPanel();
 
 
-    /** Load UI */
+    /**
+     * Load UI
+     */
 
     public GameUI() {
         this(Toolkit.getDefaultToolkit().getScreenSize());
@@ -28,7 +32,7 @@ public class GameUI extends JFrame {
 
     private GameUI(Dimension dim) {
         super("Sleeper Agent Force: M");
-        setLocation(dim.width/2-155, dim.height/2-225);
+        setLocation(dim.width / 2 - 155, dim.height / 2 - 225);
         setSize(DEFAULT_SIZE);
         configureUI();
         setResizable(true);
@@ -46,33 +50,34 @@ public class GameUI extends JFrame {
 
         add(main, BorderLayout.CENTER);
         add(userOverlay, BorderLayout.CENTER);
-        add(spriteLayer, BorderLayout.CENTER);
+//        add(spriteLayer, BorderLayout.CENTER);
     }
 
     /**
      * Image icon helper
+     *
      * @param name filename
      * @return returns image icon if image was found, otherwise null
      */
 
     protected static ImageIcon createImageIcon(String name) {
         URL imageUrl = getResource(IMAGE_DIR + name);
-        if(imageUrl != null) return new ImageIcon(imageUrl);
+        if (imageUrl != null) return new ImageIcon(imageUrl);
         return null;
     }
 
     /**
      * Changes panels based on GameState
+     *
      * @return
      */
     protected void changeState(int state) {
         GAMESTATE = state;
         main = new BackgroundPanel();
         userOverlay = new MenuPanel();
-        spriteLayer = new SpritePanel();
+//        spriteLayer = new SpritePanel();
 
         revalidate();
         repaint();
     }
-
 }
