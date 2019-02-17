@@ -13,7 +13,7 @@ public class EventTestCase extends TestCase
 	
 	public void testCancellableBase()
 	{
-		GameEventManager manager = new GameEventManager();
+		GameEventManager manager = new GameEventManager(() -> true);
 		TestListener listener = new TestListener();
 		manager.registerEvents(listener);
 		TestEvent event = manager.callEvent(new TestEvent());
@@ -22,7 +22,7 @@ public class EventTestCase extends TestCase
 	
 	public void testCancellableReason()
 	{
-		GameEventManager manager = new GameEventManager();
+		GameEventManager manager = new GameEventManager(() -> true);
 		TestListener listener = new TestListener();
 		manager.registerEvents(listener);
 		TestEvent event = manager.callEvent(new TestEvent());

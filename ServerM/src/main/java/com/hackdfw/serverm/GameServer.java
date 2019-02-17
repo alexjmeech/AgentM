@@ -1,33 +1,56 @@
 package com.hackdfw.serverm;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import com.hackdfw.serverm.logic.GameConfig;
+import com.hackdfw.serverm.logic.GameInstance;
+import com.hackdfw.serverm.logic.character.CharacterType;
+import com.hackdfw.serverm.logic.character.PlayerCharacter;
+import com.hackdfw.serverm.networking.TCPNetworkIO;
+import com.hackdfw.serverm.networking.packets.PacketList;
+import com.hackdfw.serverm.networking.packets.SelectNamePacket;
+
 public class GameServer 
 {
-	private static boolean SHUT_DOWN = false;
-
 	public static void main(String[] args)
 	{
-		while (!shutdownRequested())
+		GameInstance game = null;
+		Map<UUID, PlayerCharacter> characters = Collections.synchronizedMap(new HashMap<>());
+		List<CharacterType> types = Collections.synchronizedList(new ArrayList<>(Arrays.asList(CharacterType.values())));
+		Collections.shuffle(types);
+		TCPNetworkIO network = new TCPNetworkIO(GameConfig.SERVER_PORT, (uuid, packet) ->
+		{
+			if (packet.readInt() == PacketList.SELECT_NAME_PACKET)
+			{
+				if (!characters.containsKey(uuid))
+				{
+					SelectNamePacket p = new SelectNamePacket();
+					p.loadData(packet);
+					characters.put(uuid, new PlayerCharacter(uuid, p.getName(), types.remove(0)));
+				}
+			}
+			else if (game != null)
+			{
+				
+			}
+		});
+		while (characters.size() < GameConfig.MIN_PLAYERS)
 		{
 			try
 			{
-				System.out.println("LOADING GAME");
-				shutDown();
-				Thread.sleep(2000);
+				Thread.sleep(100);
 			}
-			catch (Exception e)
+			catch (InterruptedException e)
 			{
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public static synchronized boolean shutdownRequested()
-	{
-		return SHUT_DOWN;
-	}
-
-	public static synchronized void shutDown()
-	{
-		SHUT_DOWN = true;
+		game = new GameInstance(Thread.currentThread().getId(), characters);
 	}
 }

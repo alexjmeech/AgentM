@@ -7,6 +7,11 @@ public class TestEvent extends GameEvent implements CancellableEvent
 {
 	private String _cancel = null;
 	
+	public TestEvent()
+	{
+		super(true);
+	}
+	
 	@Override
 	public String getCancelReason()
 	{

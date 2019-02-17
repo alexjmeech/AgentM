@@ -1,8 +1,8 @@
 package com.hackdfw.serverm.logic.character.ability;
 
 import com.hackdfw.serverm.logic.GameInstance;
-import com.hackdfw.serverm.logic.GameStageType;
 import com.hackdfw.serverm.logic.character.PlayerCharacter;
+import com.hackdfw.serverm.logic.stages.GameStageType;
 
 public abstract class LimitedCharacterAbility<T extends LimitedAbilityActionBuilder> extends CharacterAbility<T>
 {

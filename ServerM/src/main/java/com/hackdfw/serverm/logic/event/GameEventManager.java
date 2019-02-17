@@ -10,13 +10,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import com.google.inject.internal.util.Preconditions;
 
 public class GameEventManager
 {
-	private final Map<Class<? extends GameEvent>, HandlerGroup> _listeners = new HashMap<>();
+	private final Supplier<Boolean> _isMainThread;
+	private final Map<Class<? extends GameEvent>, HandlerGroup> _listeners = Collections.synchronizedMap(new HashMap<>());
+	
+	public GameEventManager(Supplier<Boolean> isMainThread)
+	{
+		_isMainThread = isMainThread;
+	}
 	
 	public <T extends GameEvent> T callEvent(T event) 
 	{
+		Preconditions.checkArgument(event.onMainThread() == _isMainThread.get(), "Attempting to call event " + event.getClass().getSimpleName() + " on an incorrect thread!");
 		HandlerGroup group = _listeners.get(event.getClass());
 		
 		if (group != null)
@@ -103,7 +113,7 @@ public class GameEventManager
 		private final List<GameEventListener> _registered = new ArrayList<>();
 		private GameEventListener[] _handlers = null;
 
-		protected boolean registerListener(GameEventListener listener)
+		protected synchronized boolean registerListener(GameEventListener listener)
 		{
 			_registered.add(listener);
 			Collections.sort(_registered);
@@ -111,7 +121,7 @@ public class GameEventManager
 			return true;
 		}
 		
-		protected boolean registerListeners(Set<GameEventListener> listeners)
+		protected synchronized boolean registerListeners(Set<GameEventListener> listeners)
 		{
 			if (listeners.isEmpty())
 			{
@@ -126,7 +136,7 @@ public class GameEventManager
 			return true;
 		}
 		
-		protected boolean deregisterListeners(GameListener host)
+		protected synchronized boolean deregisterListeners(GameListener host)
 		{
 			if (_registered.removeIf(l -> l.isHostedBy(host)))
 			{
@@ -137,7 +147,7 @@ public class GameEventManager
 			return false;
 		}
 
-		protected boolean deregisterListener(GameEventListener listener)
+		protected synchronized boolean deregisterListener(GameEventListener listener)
 		{
 			if (_registered.remove(listener))
 			{
@@ -147,7 +157,7 @@ public class GameEventManager
 			return false;
 		}
 		
-		protected void processEvent(GameEvent event)
+		protected synchronized void processEvent(GameEvent event)
 		{
 			for (GameEventListener listener : _handlers)
 			{
