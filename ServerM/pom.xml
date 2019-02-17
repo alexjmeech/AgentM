@@ -41,7 +41,7 @@
         <configuration>
             <archive>
                 <manifestEntries>
-                    <Main-Class>com.hacksmu.serverm.GameServer</Main-Class> 
+                    <Main-Class>com.hackdfw.serverm.GameServer</Main-Class> 
                 </manifestEntries>
             </archive>
         </configuration>

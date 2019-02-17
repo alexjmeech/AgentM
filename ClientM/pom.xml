@@ -41,7 +41,7 @@
         <configuration>
             <archive>
                 <manifestEntries>
-                    <Main-Class>com.hacksmu.clientm.App</Main-Class> 
+                    <Main-Class>com.hackdfw.clientm.App</Main-Class> 
                 </manifestEntries>
             </archive>
         </configuration>
