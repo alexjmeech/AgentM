@@ -18,7 +18,10 @@ import com.hackdfw.serverm.logic.character.PlayerCharacter;
 import com.hackdfw.serverm.logic.character.PlayerDeathEvent;
 import com.hackdfw.serverm.logic.chat.GameChatManager;
 import com.hackdfw.serverm.logic.chat.PlayerMessagingSystem;
+import com.hackdfw.serverm.logic.event.EventHandler;
 import com.hackdfw.serverm.logic.event.GameEventManager;
+import com.hackdfw.serverm.logic.event.GameEventManager.ListenerPriority;
+import com.hackdfw.serverm.logic.event.GameListener;
 import com.hackdfw.serverm.logic.stages.GameStage;
 import com.hackdfw.serverm.logic.stages.GameStageType;
 import com.hackdfw.serverm.logic.stages.impl.MeetingStage;
@@ -26,9 +29,11 @@ import com.hackdfw.serverm.networking.NetworkedPacket;
 import com.hackdfw.serverm.networking.Packet;
 import com.hackdfw.serverm.networking.TCPNetworkIO;
 import com.hackdfw.serverm.networking.packets.ChatInputPacket;
+import com.hackdfw.serverm.networking.packets.GameEndPacket;
 import com.hackdfw.serverm.networking.packets.PacketList;
+import com.hackdfw.serverm.networking.packets.PlayerDeathPacket;
 
-public class GameInstance
+public class GameInstance implements GameListener
 {
 	private final long _mainThread;
 	private final TCPNetworkIO _network;
@@ -46,6 +51,7 @@ public class GameInstance
 		_mainThread = mainThread;
 		_network = network;
 		_eventManager = new GameEventManager(this::isMainThread);
+		_eventManager.registerEvents(this);
 		_chatManager = new GameChatManager(this);
 		_messagingSystem = new PlayerMessagingSystem(this);
 		_characters.putAll(players);
@@ -62,6 +68,15 @@ public class GameInstance
 					_characters.values().forEach(c -> c.getActive(_currentStage.getType()).forEach(a -> a.handlePackets(_incoming.remove(c.getUUID()))));
 					_incoming.clear();
 					_currentStage.tick();
+					
+					if (getRemainingMembers(CharacterAlliance.USA) == 0)
+					{
+						end(CharacterAlliance.USSR);
+					}
+					else if (getRemainingMembers(CharacterAlliance.USSR) == 0)
+					{
+						end(CharacterAlliance.USA);
+					}
 				}
 				
 				Thread.sleep(1000 / GameConfig.TPS);
@@ -88,11 +103,11 @@ public class GameInstance
 		return _running.get();
 	}
 	
-	public void end()
+	public void end(CharacterAlliance winner)
 	{
 		if (_running.compareAndSet(true, false))
 		{
-			
+			_characters.keySet().forEach(k -> writePacket(k, new GameEndPacket(winner.ordinal())));
 		}
 	}
 	
@@ -179,7 +194,6 @@ public class GameInstance
 		}
 		else if (_stageType.compareAndSet(old.getType(), newStage.getType()))
 		{
-			getPlayers(true).forEach(p -> p.getActive(old.getType()).forEach(a -> a.use(old.getType())));
 			_stageType.set(newStage.getType());
 			_currentStage = newStage;
 			old.clean();
@@ -213,5 +227,11 @@ public class GameInstance
 	public void writePacket(UUID target, Packet packet)
 	{
 		_network.writePacket(target, packet);
+	}
+	
+	@EventHandler(priority = ListenerPriority.HIGH)
+	public void onDie(PlayerDeathEvent event)
+	{
+		_characters.keySet().forEach(u -> writePacket(u, new PlayerDeathPacket(event.getPlayer().getUUID())));
 	}
 }

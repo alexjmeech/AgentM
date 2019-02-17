@@ -21,7 +21,10 @@ public abstract class GameStage implements GameListener
 		_start = System.currentTimeMillis();
 	}
 	
-	public abstract String getName();
+	public String getName()
+	{
+		return getType().getName();
+	}
 	
 	public abstract GameStageType getType();
 	

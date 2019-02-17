@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.hackdfw.serverm.logic.GameInstance;
 import com.hackdfw.serverm.logic.character.PlayerDeathEvent;
+import com.hackdfw.serverm.logic.chat.PlayerChatEvent;
 import com.hackdfw.serverm.logic.event.EventHandler;
 import com.hackdfw.serverm.logic.stages.GameStage;
 import com.hackdfw.serverm.logic.stages.GameStageType;
@@ -20,12 +21,6 @@ public class NightStage extends GameStage
 	public NightStage(GameInstance game)
 	{
 		super(game, TimeUnit.SECONDS.toMillis(45));
-	}
-
-	@Override
-	public String getName()
-	{
-		return "Night";
 	}
 
 	@Override
@@ -48,6 +43,7 @@ public class NightStage extends GameStage
 	{
 		if (getTimeRemaining() <= 0)
 		{
+			Game.getPlayers(true).forEach(p -> p.getActive(getType()).forEach(a -> a.use(getType()).getRun().run()));
 			GameStage next = new MeetingStage(Game, _deaths.toArray(new PlayerDeathEvent[_deaths.size()]));
 			Game.changeStage(next);
 		}
@@ -60,5 +56,11 @@ public class NightStage extends GameStage
 	public void onDeath(PlayerDeathEvent event)
 	{
 		_deaths.add(event);
+	}
+	
+	@EventHandler
+	public void onChat(PlayerChatEvent event)
+	{
+		event.cancel("There's nobody around!");
 	}
 }

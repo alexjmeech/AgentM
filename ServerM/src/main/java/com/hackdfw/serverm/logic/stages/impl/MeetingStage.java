@@ -24,12 +24,6 @@ public class MeetingStage extends GameStage
 	}
 
 	@Override
-	public String getName()
-	{
-		return "Meeting";
-	}
-
-	@Override
 	public GameStageType getType()
 	{
 		return GameStageType.MEETING;
@@ -82,11 +76,11 @@ public class MeetingStage extends GameStage
 			
 			if (_nightDeaths.length > 0)
 			{
-				
+				next = new DeliberationStage(Game);
 			}
 			else
 			{
-				
+				next = new NightStage(Game);
 			}
 			
 			Game.changeStage(next);

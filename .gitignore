@@ -24,5 +24,10 @@
 hs_err_pid*
 
 # Stray Maven Files
-/target/
+target/
 dependency-reduced-pom.xml
+
+# Eclipse Files
+.classpath
+.project
+.settings

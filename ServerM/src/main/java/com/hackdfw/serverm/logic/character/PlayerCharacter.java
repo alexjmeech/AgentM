@@ -12,6 +12,7 @@ import com.hackdfw.serverm.logic.GameInstance;
 import com.hackdfw.serverm.logic.character.PlayerDeathEvent.PlayerDeathCause;
 import com.hackdfw.serverm.logic.character.ability.CharacterAbility;
 import com.hackdfw.serverm.logic.stages.GameStageType;
+import com.hackdfw.serverm.networking.packets.PlayerSpawnPacket;
 
 public class PlayerCharacter
 {
@@ -71,6 +72,10 @@ public class PlayerCharacter
 			}
 			_alive.set(true);
 			_host = game;
+			for (PlayerCharacter c : _host.getPlayers(false))
+			{
+				_host.writePacket(c.getUUID(), new PlayerSpawnPacket(_uuid, _type.ordinal()));
+			}
 			return true;
 		}
 		catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
