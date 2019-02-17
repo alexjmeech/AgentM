@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.hackdfw.serverm.logic.GameConfig;
 import com.hackdfw.serverm.logic.GameInstance;
@@ -20,7 +21,7 @@ public class GameServer
 {
 	public static void main(String[] args)
 	{
-		GameInstance game = null;
+		AtomicReference<GameInstance> game = new AtomicReference<>();
 		Map<UUID, PlayerCharacter> characters = Collections.synchronizedMap(new HashMap<>());
 		List<CharacterType> types = Collections.synchronizedList(new ArrayList<>(Arrays.asList(CharacterType.values())));
 		Collections.shuffle(types);
@@ -35,9 +36,10 @@ public class GameServer
 					characters.put(uuid, new PlayerCharacter(uuid, p.getName(), types.remove(0)));
 				}
 			}
-			else if (game != null)
+			else if (game.get() != null)
 			{
-				
+				packet.reset();
+				game.get().receivePacket(uuid, packet);
 			}
 		});
 		while (characters.size() < GameConfig.MIN_PLAYERS)
@@ -51,6 +53,6 @@ public class GameServer
 				e.printStackTrace();
 			}
 		}
-		game = new GameInstance(Thread.currentThread().getId(), characters);
+		game.set(new GameInstance(Thread.currentThread().getId(), characters, network));
 	}
 }

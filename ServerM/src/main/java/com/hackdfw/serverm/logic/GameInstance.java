@@ -23,10 +23,15 @@ import com.hackdfw.serverm.logic.stages.GameStage;
 import com.hackdfw.serverm.logic.stages.GameStageType;
 import com.hackdfw.serverm.logic.stages.impl.MeetingStage;
 import com.hackdfw.serverm.networking.NetworkedPacket;
+import com.hackdfw.serverm.networking.Packet;
+import com.hackdfw.serverm.networking.TCPNetworkIO;
+import com.hackdfw.serverm.networking.packets.ChatInputPacket;
+import com.hackdfw.serverm.networking.packets.PacketList;
 
 public class GameInstance
 {
 	private final long _mainThread;
+	private final TCPNetworkIO _network;
 	private final Map<UUID, PlayerCharacter> _characters = new ConcurrentHashMap<>();
 	private final GameEventManager _eventManager;
 	private final GameChatManager _chatManager;
@@ -36,9 +41,10 @@ public class GameInstance
 	private final Map<UUID, List<NetworkedPacket>> _incoming = new ConcurrentHashMap<>();
 	private GameStage _currentStage;
 	
-	public GameInstance(long mainThread, Map<UUID, PlayerCharacter> players)
+	public GameInstance(long mainThread, Map<UUID, PlayerCharacter> players, TCPNetworkIO network)
 	{
 		_mainThread = mainThread;
+		_network = network;
 		_eventManager = new GameEventManager(this::isMainThread);
 		_chatManager = new GameChatManager(this);
 		_messagingSystem = new PlayerMessagingSystem(this);
@@ -194,6 +200,18 @@ public class GameInstance
 	
 	public void receivePacket(UUID uuid, NetworkedPacket packet)
 	{
+		if (packet.readInt() == PacketList.CHAT_INPUT_PACKET)
+		{
+			ChatInputPacket p = new ChatInputPacket();
+			_messagingSystem.handleIncomingMessage(uuid, p.getMessage());
+			return;
+		}
+		packet.reset();
 		_incoming.computeIfAbsent(uuid, k -> Collections.synchronizedList(new LinkedList<>())).add(packet);
+	}
+	
+	public void writePacket(UUID target, Packet packet)
+	{
+		_network.writePacket(target, packet);
 	}
 }
